@@ -1,15 +1,83 @@
 <script>
+  import { onMount, afterUpdate } from "svelte";
   import IconThumbnail from "./IconThumbnail.svelte";
   import { profile } from "../store.js";
+  import { getRequest } from "./../utils/getRequest.js";
+  import io from "socket.io-client";
 
-  export let active = true;
-  export let open = true;
+  const socket = io.connect("http://localhost:3000");
+
   export let user;
+  let active = true;
+  export let open;
+
+  let bindMessagesContainer;
+  let bindInput;
+
+  $: currentFriend = $profile.friends.find(friend => friend.id === user.id);
+
+  onMount(() => {
+    setTimeout(async () => {
+      let response = await getRequest("/messages", {
+        friendId: currentFriend.id
+      });
+
+      // console.log(response.messages);
+      currentFriend.chat = response.messages;
+      // console.log(currentFriend.username);
+      socket.emit("privateRoom", $profile.username, currentFriend.username);
+    }, 200);
+  });
+
+  afterUpdate(() => {
+    if (bindMessagesContainer) {
+      bindMessagesContainer.scrollTop =
+        bindMessagesContainer.scrollHeight - bindMessagesContainer.clientHeight;
+    }
+  });
+
+  socket.on("privateMessage", data => {
+    console.log("privateMessageEvent", data);
+
+    currentFriend.chat = [
+      ...currentFriend.chat,
+      {
+        isMe: data.from === $profile._id ? true : false,
+        message: data.message,
+        timestamp: data.timestamp
+      }
+    ];
+    if (data.from === $profile._id) {
+      bindInput.value = "";
+    }
+    bindMessagesContainer.scrollTop =
+      bindMessagesContainer.scrollHeight - bindMessagesContainer.clientHeight;
+
+    // console.log(currentFriend.chat);
+  });
+
+  // $: if (open || user.activeChat) {
+  // }
+
+  // $: setTimeout(() => {
+  //   bindMessagesContainer.scrollTop =
+  //     bindMessagesContainer.scrollHeight - bindMessagesContainer.clientHeight;
+  // }, 200);
+
+  const onSendMessage = e => {
+    e.preventDefault();
+    console.log($profile._id);
+    if (bindInput.value !== "") {
+      socket.emit("message", $profile._id, currentFriend.id, bindInput.value);
+    }
+  };
 
   const closeChat = e => {
     $profile.activeChats = $profile.activeChats.filter(
       chat => chat.id !== user.id
     );
+
+    socket.emit("leaveRoom", $profile.username, currentFriend.username);
     e.stopPropagation();
   };
 
@@ -77,6 +145,11 @@
     background: #0099ff;
     max-width: 70%;
   }
+
+  .messagesContainer {
+    height: 14rem;
+    overflow: auto;
+  }
 </style>
 
 {#if active === true}
@@ -120,35 +193,52 @@
             <i class="m-1 fas fa-times" on:click={closeChat} />
           </div>
         </div>
-        <div class="h-full p-2">
-          <div class="messageReceiver">
-            <div>
-              <p
-                class="inline-block text-sm rounded-lg mx-0 my-1 p-2 font-medium">
-                Hey Razvan!
-              </p>
-            </div>
+        <div
+          bind:this={bindMessagesContainer}
+          class="messagesContainer grid grid-cols-1 h-full p-2">
+          {#if user.chat.length === 0}
+            <p class="text-center">Start this chat now...</p>
+          {:else}
+            {#each currentFriend.chat as message}
+              {#if message.isMe}
+                <div class="messageSender">
+                  <p
+                    class="float-right text-sm rounded-lg mx-0 my-1 p-2
+                    font-medium text-white">
+                    {@html message.message}
+                  </p>
+                </div>
+              {:else}
+                <div class="messageReceiver">
+                  <div>
+                    <p
+                      class="inline-block text-sm rounded-lg mx-0 my-1 p-2
+                      font-medium">
+                      {@html message.message}
+                    </p>
+                  </div>
+                </div>
+              {/if}
+            {/each}
+          {/if}
 
-          </div>
-          <div class="messageSender">
-            <p
-              class="float-right text-sm rounded-lg mx-0 my-1 p-2 font-medium
-              text-white">
-              Hey Cassandra!
-            </p>
-          </div>
         </div>
         <div class="chatInputContainer grid w-full p-1">
-          <form class="flex items-center">
+          <form class="flex items-center" on:submit={e => onSendMessage(e)}>
             <input
+              bind:this={bindInput}
               class="rounded-full h-8 w-full bg-gray-200 p-2"
               type="text"
               placeholder="Message..." />
           </form>
           <div
             class="chatLikeButton flex items-center justify-center
-            cursor-pointer">
-            <i class=" far fa-thumbs-up" />
+            cursor-pointer"
+            on:click={() => {
+              bindInput.value = ':like:';
+            }}>
+            <img src="/images/like.png" style="width: 18px;" alt="like" />
+            <!-- <i class=" far fa-thumbs-up" style="color: #0099ff;" /> -->
           </div>
         </div>
       </div>

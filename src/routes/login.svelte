@@ -1,5 +1,12 @@
 <script>
   import LoginForm from "../components/LoginForm.svelte";
+
+  import { checkSession } from "./../utils/checkSession.js";
+  import { onMount } from "svelte";
+
+  onMount(() => {
+    checkSession();
+  });
 </script>
 
 <style>

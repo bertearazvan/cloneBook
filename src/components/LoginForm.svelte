@@ -1,11 +1,36 @@
 <script>
   // ####
+  import { getRequest } from "./../utils/getRequest.js";
+  import { postRequest } from "./../utils/postRequest.js";
+
   import RegisterForm from "./RegisterForm.svelte";
 
-  let page = "register";
-  const onLogin = e => {
+  import { profile } from "./../store.js";
+
+  let page = "login";
+
+  // const checkSession = async () => {
+  //   let response = await getRequest("/users/session");
+  //   if (response.type === "success") {
+  //     location.href = `/`;
+  //   }
+  // };
+
+  const onLogin = async e => {
     e.preventDefault();
-    console.log("Log in ");
+    let data = new FormData(e.target);
+    let response = await postRequest("/users/login", data);
+
+    if (response.type === "success") {
+      localStorage.setItem("token", response.token);
+      $profile = response.user;
+      $profile = $profile;
+
+      location.href = `/`;
+    }
+
+    console.log(response);
+    // console.log("Log in ");
   };
 
   const onChangeForm = data => {
@@ -23,15 +48,17 @@
     class="loginFormContainer max-w-md w-full mt-4 bg-white rounded-lg shadow
     p-4">
     <h2 class="ml-2 text-xl mb-2">Log in</h2>
-    <form on:submit={onLogin}>
+    <form on:submit={e => onLogin(e)}>
       <input
         class="rounded-lg bg-gray-200 m-1 p-2"
         type="text"
-        placeholder="Email" />
+        name="username"
+        placeholder="Username" />
 
       <input
         class="rounded-lg bg-gray-200 m-1 p-2"
         type="password"
+        name="password"
         placeholder="Password" />
       <div class="relative">
         <span

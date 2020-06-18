@@ -1,10 +1,14 @@
 import { writable } from "svelte/store";
+// import EventSource from "eventsource";
 
-export let profile = writable({
+// let eventSource = new EventSource("http://localhost:3000/sse");
+
+let user = {
   id: 1,
   firstName: "Razvan",
   lastName: "Bertea",
   photo: "/images/profile/razvan_img.jpg",
+  username: "bertearazvan",
   status: 1,
   public_json: {
     id: 1,
@@ -12,172 +16,218 @@ export let profile = writable({
     lastName: "Bertea",
     photo: "/images/profile/razvan_img.jpg",
     status: 1,
+    username: "bertearazvan",
   },
-  posts: [
+  posts: [],
+  friends: [],
+  activeChats: [],
+
+  notifications: [
     {
       id: 1,
-      description: "I believe it‼️🤣",
-      timestamp: "2hrs",
-      likes: [
-        {
-          id: 1,
-          firstName: "Razvan",
-          lastName: "Bertea",
-          photo: "/images/profile/razvan_img.jpg",
-          status: 1,
-        },
-      ],
-      photo: "/images/posts/post_img_food.jpg",
+      type: "request",
+      body: "Has sent you a request",
+      user: {
+        id: 3,
+        firstName: "Stefan",
+        lastName: "Andrei",
+        username: "andrei",
+        photo: "/images/profile/andrei_img.jpg",
+        status: 0,
+      },
+      timestamp: "now",
+    },
+    {
+      id: 2,
+      type: "info",
+      body: "Has liked your post",
+      timestamp: "now",
+      user: {
+        id: 3,
+        firstName: "Stefan",
+        lastName: "Andrei",
+        username: "andrei",
+        photo: "/images/profile/andrei_img.jpg",
+        status: 0,
+      },
+    },
+    {
+      id: 3,
+      type: "info",
+      body: "Has liked your post and more info here",
+      timestamp: "now",
+      user: {
+        id: 2,
+        firstName: "Cassandra",
+        lastName: "Tiltack",
+        username: "cassandra",
+        photo: "/images/profile/cass_img.jpg",
+        status: 1,
+      },
+    },
+    {
+      id: 4,
+      type: "info",
+      body: "Has liked your post",
+      timestamp: "now",
       user: {
         id: 4,
+        firstName: "Alin",
+        username: "alin",
+        lastName: "Chiosa",
+        photo: "/images/profile/alin_img.jpg",
+        status: 1,
+      },
+    },
+    {
+      id: 5,
+      type: "request",
+      body: "Has sent you a request",
+      user: {
+        id: 2,
+        firstName: "Cassandra",
+        username: "cassandra",
+        lastName: "Tiltack",
+        photo: "/images/profile/cass_img.jpg",
+        status: 1,
+      },
+      timestamp: "now",
+    },
+    {
+      id: 5,
+      type: "info",
+      body: "Has liked your post",
+      timestamp: "now",
+      user: {
+        id: 4,
+        username: "alin",
         firstName: "Alin",
         lastName: "Chiosa",
         photo: "/images/profile/alin_img.jpg",
         status: 1,
       },
-      comments: [
-        {
-          id: 1,
-          user: {
-            id: 3,
-            firstName: "Stefan",
-            lastName: "Andrei",
-            photo: "/images/profile/andrei_img.jpg",
-            status: 0,
-          },
-          post_id: 1,
-          likes: [
-            {
-              id: 1,
-              firstName: "Razvan",
-              lastName: "Bertea",
-              photo: "/images/profile/razvan_img.jpg",
-              status: 1,
-            },
-          ],
-          comment_body: "You are very funny Alin!!!",
-          timestamp: "35 mins",
-          replies: [
-            {
-              id: 1,
-              user: {
-                id: 2,
-                firstName: "Cassandra",
-                lastName: "Tiltack",
-                photo: "/images/profile/cass_img.jpg",
-                status: 1,
-              },
-              likes: [
-                {
-                  id: 1,
-                  firstName: "Razvan",
-                  lastName: "Bertea",
-                  photo: "/images/profile/razvan_img.jpg",
-                  status: 1,
-                },
-              ],
-              comment_body: "True😅 very good joke!!!",
-              timestamp: "39 mins",
-            },
-            {
-              id: 2,
-              user: {
-                id: 3,
-                firstName: "Stefan",
-                lastName: "Andrei",
-                photo: "/images/profile/andrei_img.jpg",
-                status: 0,
-              },
-              likes: [],
-              comment_body: "Right??? He is so fuckin funnyyy =))))))",
-              timestamp: "41 mins",
-            },
-          ],
-        },
-        {
-          id: 2,
-          user: {
-            id: 1,
-            firstName: "Razvan",
-            lastName: "Bertea",
-            photo: "/images/profile/razvan_img.jpg",
-            status: 0,
-          },
-          post_id: 1,
-          likes: [],
-          comment_body: "Hehe Alin, nice joke my friend",
-          timestamp: "1hr",
-          replies: [
-            {
-              id: 1,
-              user: {
-                id: 3,
-                firstName: "Stefan",
-                lastName: "Andrei",
-                photo: "/images/profile/andrei_img.jpg",
-                status: 0,
-              },
-              comment_body: "I thought so too!",
-              timestamp: "1hr",
-              likes: [],
-            },
-            {
-              id: 2,
-              user: {
-                id: 3,
-                firstName: "Stefan",
-                lastName: "Andrei",
-                photo: "/images/profile/andrei_img.jpg",
-                status: 0,
-              },
-              comment_body: "blablalba",
-              timestamp: "35 mins",
-              likes: [
-                {
-                  id: 1,
-                  firstName: "Razvan",
-                  lastName: "Bertea",
-                  photo: "/images/profile/razvan_img.jpg",
-                  status: 1,
-                },
-              ],
-            },
-          ],
-        },
-      ],
     },
   ],
-  friends: [
+};
+
+// eventSource.onmessage = (data) => {
+//   user = JSON.parse(data.data);
+//   console.log(user);
+//   // $profile = user;
+// };
+
+export let users = writable([]);
+
+export let profile = writable({
+  id: 1,
+  firstName: "Razvan",
+  lastName: "Bertea",
+  photo: "/images/profile/razvan_img.jpg",
+  username: "bertearazvan",
+  status: 1,
+  public_json: {
+    id: 1,
+    firstName: "Razvan",
+    lastName: "Bertea",
+    photo: "/images/profile/razvan_img.jpg",
+    status: 1,
+    username: "bertearazvan",
+  },
+  posts: [],
+  friends: [],
+  activeChats: [],
+
+  notifications: [
     {
       id: 1,
-      firstName: "Razvan",
-      lastName: "Bertea",
-      photo: "/images/profile/razvan_img.jpg",
-      status: 0,
+      type: "request",
+      body: "Has sent you a request",
+      user: {
+        id: 3,
+        firstName: "Stefan",
+        lastName: "Andrei",
+        username: "andrei",
+        photo: "/images/profile/andrei_img.jpg",
+        status: 0,
+      },
+      timestamp: "now",
     },
     {
       id: 2,
-      firstName: "Cassandra",
-      lastName: "Tiltack",
-      photo: "/images/profile/cass_img.jpg",
-      status: 1,
+      type: "info",
+      body: "Has liked your post",
+      timestamp: "now",
+      user: {
+        id: 3,
+        firstName: "Stefan",
+        lastName: "Andrei",
+        username: "andrei",
+        photo: "/images/profile/andrei_img.jpg",
+        status: 0,
+      },
     },
     {
       id: 3,
-      firstName: "Stefan",
-      lastName: "Andrei",
-      photo: "/images/profile/andrei_img.jpg",
-      status: 0,
+      type: "info",
+      body: "Has liked your post and more info here",
+      timestamp: "now",
+      user: {
+        id: 2,
+        firstName: "Cassandra",
+        lastName: "Tiltack",
+        username: "cassandra",
+        photo: "/images/profile/cass_img.jpg",
+        status: 1,
+      },
     },
     {
       id: 4,
-      firstName: "Alin",
-      lastName: "Chiosa",
-      photo: "/images/profile/alin_img.jpg",
-      status: 1,
+      type: "info",
+      body: "Has liked your post",
+      timestamp: "now",
+      user: {
+        id: 4,
+        firstName: "Alin",
+        username: "alin",
+        lastName: "Chiosa",
+        photo: "/images/profile/alin_img.jpg",
+        status: 1,
+      },
+    },
+    {
+      id: 5,
+      type: "request",
+      body: "Has sent you a request",
+      user: {
+        id: 2,
+        firstName: "Cassandra",
+        username: "cassandra",
+        lastName: "Tiltack",
+        photo: "/images/profile/cass_img.jpg",
+        status: 1,
+      },
+      timestamp: "now",
+    },
+    {
+      id: 5,
+      type: "info",
+      body: "Has liked your post",
+      timestamp: "now",
+      user: {
+        id: 4,
+        username: "alin",
+        firstName: "Alin",
+        lastName: "Chiosa",
+        photo: "/images/profile/alin_img.jpg",
+        status: 1,
+      },
     },
   ],
-  activeChats: [],
 });
 
-export let posts = writable();
+export let storePosts = writable([]);
+
+export let postModal = writable({
+  show: false,
+  postData: undefined,
+});

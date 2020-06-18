@@ -1,10 +1,18 @@
 <script>
   // ###
+
+  import { postRequest } from "./../utils/postRequest.js";
+
   export let onChangeForm;
 
-  const onRegister = e => {
+  const onRegister = async e => {
     e.preventDefault();
-    console.log("Register ");
+
+    let data = new FormData(e.target);
+    let response = await postRequest("/users/signup", data);
+    console.log(response);
+
+    // console.log("Register ");
   };
 </script>
 
@@ -15,29 +23,34 @@
 <div
   class="loginFormContainer max-w-md w-full mt-4 bg-white rounded-lg shadow p-4">
   <h2 class="ml-2 text-xl mb-2">Register</h2>
-  <form on:submit={onRegister}>
+  <form on:submit={e => onRegister(e)}>
     <div class="grid grid-cols-2 gap-2">
       <input
         class="rounded-lg bg-gray-200 m-1 p-2"
         type="text"
+        name="firstName"
         placeholder="First name" />
       <input
         class="rounded-lg bg-gray-200 m-1 p-2"
+        name="lastName"
         type="text"
         placeholder="Last name" />
     </div>
     <input
       class="rounded-lg bg-gray-200 m-1 p-2"
       type="text"
-      placeholder="Email" />
+      name="username"
+      placeholder="Username" />
     <div class="grid grid-cols-2 gap-2">
       <input
         class="rounded-lg bg-gray-200 m-1 p-2"
         type="password"
+        name="password"
         placeholder="Password" />
       <input
         class="rounded-lg bg-gray-200 m-1 p-2"
         type="password"
+        name="repeatPassword"
         placeholder="Repeat passsword" />
     </div>
 

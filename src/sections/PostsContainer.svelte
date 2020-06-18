@@ -1,7 +1,16 @@
 <script>
   import IconThumbnail from "../components/IconThumbnail.svelte";
   import Post from "../components/Post.svelte";
-  import { profile } from "../store.js";
+  import { profile, storePosts, postModal } from "../store.js";
+
+  // $: posts = $profile.posts;
+  export let posts;
+  // console.log($storePosts);
+
+  const onOpenModal = () => {
+    $postModal.show = true;
+    console.log($postModal);
+  };
 </script>
 
 <style>
@@ -25,42 +34,47 @@
 </style>
 
 <section class="m-4">
+
   <div id="postFormContainer" class="bg-white h-32 p-3 shadow rounded-lg">
     <form>
       <div id="postInput" class="grid pb-4">
         <IconThumbnail photoUrl={$profile.photo} width="2.5rem" />
-        <input
-          class="rounded-full bg-gray-200 p-2"
-          placeholder="What's on your mind Razvan?"
-          type="text" />
+        <div
+          class="rounded-full w-full bg-gray-200 p-2 cursor-pointer"
+          on:click={onOpenModal}>
+          <p class="text-gray-500">What's on your mind {$profile.firstName}?</p>
+        </div>
+
       </div>
       <div class="grid h-12 grid-cols-3 text-gray-600">
         <div
           class="actionTab flex items-center justify-center cursor-pointer
           rounded-lg">
           <img src="/images/action_media.png" alt="profile" />
-          <p class="p-2">Photo/Video</p>
+          <p class="p-2" on:click={onOpenModal}>Photo/Video</p>
         </div>
         <div
           class="actionTab flex items-center justify-center cursor-pointer
           rounded-lg">
           <img src="/images/action_friends.png" alt="profile" />
-          <p class="p-2">Tag Friends</p>
+          <p class="p-2" on:click={onOpenModal}>Tag Friends</p>
         </div>
         <div
           class="actionTab flex items-center justify-center cursor-pointer
           rounded-lg">
           <img src="/images/action_activity.png" alt="profile" />
-          <p class="p-2">Feeling/Activity</p>
+          <p class="p-2" on:click={onOpenModal}>Feeling/Activity</p>
         </div>
       </div>
     </form>
 
   </div>
   <section id="postsSectionContainer">
-    {#each $profile.posts as post}
-      <Post {post} />
-    {/each}
+    {#if posts}
+      {#each posts as post}
+        <Post {post} />
+      {/each}
+    {/if}
   </section>
 
   <br />

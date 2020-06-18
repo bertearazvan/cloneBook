@@ -1,29 +1,30 @@
 <script>
   import IconThumbnail from "../components/IconThumbnail.svelte";
+  import SearchBar from "../components/SearchBar.svelte";
+  import NavSocialIcons from "../components/NavSocialActions.svelte";
   import { profile } from "../store.js";
 
   // export let segment;
 
-  let searchResultsDisplay = "none";
-  let ajUsers = [];
+  // let ajUsers = [];
 
-  const showSearchResults = () => {
-    searchResultsDisplay = "grid";
-  };
+  // const showSearchResults = () => {
+  //   searchResultsDisplay = "grid";
+  // };
 
-  const hideSearchResults = () => {
-    searchResultsDisplay = "none";
-  };
+  // const hideSearchResults = () => {
+  //   searchResultsDisplay = "none";
+  // };
 
-  // connect and get data - takes time
-  const getData = async () => {
-    ajUsers = [];
-    //Get fresh data from the api
-    let connection = await fetch("http://localhost/users");
-    let data = await connection.json();
-    console.log(data);
-    ajUsers = data;
-  };
+  // // connect and get data - takes time
+  // const getData = async () => {
+  //   ajUsers = [];
+  //   //Get fresh data from the api
+  //   let connection = await fetch("http://localhost/users");
+  //   let data = await connection.json();
+  //   console.log(data);
+  //   ajUsers = data;
+  // };
 </script>
 
 <style>
@@ -42,33 +43,16 @@
   }
 
   .navC3 {
-    grid-template-columns: 2fr 1fr 1fr;
+    grid-template-columns: 2fr 2fr;
   }
 
-  div#searchResults {
-    position: absolute;
-    width: 100%;
-    height: 10rem;
-    background: white;
-    color: #333;
-    border: 1px solid #999;
-    border-top: none;
-    padding: 0px 0.2rem;
-  }
-
-  div#searchContainer {
-    position: relative;
-    display: grid;
-    align-items: center;
-  }
-
-  .flex-center i {
+  /* .flex-center i {
     transition: 0.2s ease;
   }
 
   .flex-center i:hover {
     font-size: 1.3rem;
-  }
+  } */
 
   .profileIcon {
     transition: 0.2s ease;
@@ -91,25 +75,7 @@
         src="/images/PhoneBook_logo.png"
         alt="CloneBook" />
     </a>
-    <div id="searchContainer">
-      <form class="relative flex items-center ml-4">
-        <i class=" absolute pl-2 fas fa-search" />
-        <input
-          class="pl-8 h-10 bg-gray-200"
-          type="text"
-          placeholder="Search on CloneBook"
-          on:focus={() => {
-            getData();
-            showSearchResults();
-          }}
-          on:blur={hideSearchResults} />
-      </form>
-      <div id="searchResults" style="display: {searchResultsDisplay};">
-        {#each ajUsers as jUser}
-          <div>{jUser.firstName} {jUser.lastName}</div>
-        {/each}
-      </div>
-    </div>
+    <SearchBar />
 
   </div>
   <div class="navC2 grid grid-cols-1">
@@ -130,7 +96,7 @@
   </div>
   <div class="navC3 grid gap-4">
     <div class="flex items-center justify-center">
-      <a href="/profile">
+      <a href={'profile/' + $profile.username}>
         <div
           class="profileIcon grid grid-cols-2 gap-2 rounded-full p-2
           cursor-pointer">
@@ -146,14 +112,8 @@
       </a>
 
     </div>
-    <div
-      class="flex items-center justify-center flex-center"
-      style="font-size: 1.2rem;">
-      <i class="far fa-comment-alt" />
+    <div>
+      <NavSocialIcons />
     </div>
-    <div class="flex items-center justify-center flex-center">
-      <i class="far fa-bell" style="font-size: 1.2rem;" />
-    </div>
-
   </div>
 </nav>

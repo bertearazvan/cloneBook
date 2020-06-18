@@ -15,7 +15,7 @@
 
 <section class="m-2 p-2">
   <div>
-    <a href="/profile">
+    <a href={`profile/${$profile.username}`}>
       <div
         class="actionProfile p-2 cursor-pointer flex items-center rounded-lg
         justify-start">
