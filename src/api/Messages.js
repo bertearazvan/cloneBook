@@ -26,34 +26,3 @@ router.get("/messages", isAuthenticated, (req, res) => {
 });
 
 module.exports = router;
-// console.log(io);
-
-// Run when client connected
-// io.on("connection", socket => {
-//   console.log("New IO connection");
-
-//   socket.on("joinRoom", ({
-//     username,
-//     room
-//   }) => {
-//     const escapedUsername = escape(username);
-//     const escapedRoom = escape(room);
-//     const user = userJoin(socket.id, escapedUsername, escapedRoom);
-
-//     socket.join(user.room);
-//     socket.emit("message", formatMessage(botName, "Welcome to ChatNow!"));
-//     socket.broadcast
-//       .to(user.room)
-//       .emit(
-//         "message",
-//         formatMessage(botName, `${escapedUsername} has joined ${escapedRoom} `)
-//       );
-
-//     //Send users in room info
-
-//     io.to(user.room).emit("roomUsers", {
-//       room: user.room,
-//       users: getRoomUsers(user.room)
-//     });
-//   });
-// }

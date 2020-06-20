@@ -11,12 +11,15 @@ const { isAuthenticated } = require("./../middleware/isAuthenticated");
 
 router.get("/notifications", isAuthenticated, async (req, res) => {
   // get all notifications for this user
-  let notifications = req.user.notifications.filter(
-    (notification) =>
-      notification.user.id.toString() !== req.user._id.toString()
-  );
+  // let notifications = req.user.notifications.filter(
+  //   (notification) =>
+  //     notification.user.id.toString() !== req.user._id.toString()
+  // );
+
   return res.status(200).send({
-    notifications: notifications.sort((a, b) => b.timestamp - a.timestamp),
+    notifications: req.user.notifications.sort(
+      (a, b) => b.timestamp - a.timestamp
+    ),
   });
 });
 
@@ -112,12 +115,43 @@ router.get("/notifications/add", isAuthenticated, async (req, res) => {
 
     // console.log(checkFriend);
 
+    let notificationFriendExist = friend.notifications.find(
+      (notif) =>
+        notif.type === "request" &&
+        notif.user.id.toString() === req.user._id.toString()
+    );
+
+    let notificationUserExist = req.user.notifications.find(
+      (notif) =>
+        notif.type === "request" && notif.user.id.toString() === friendId
+    );
+
+    // console.log(
+    //   "############################################",
+    //   notificationUserExist,
+    //   notificationFriendExist
+    // );
+
     if (checkFriend) {
+      // check if the notification is already there in both users
+      // if it is then we need to update, otherwise insert
+
       return res.status(500).send({
         message: "You already have this friend.",
         type: "error",
       });
     }
+
+    // friend.notifications = friend.notifications.filter((notif) => {
+    //   console.log(
+    //     notif.type === "request" &&
+    //       notif.user.id.toString() === req.user._id.toString()
+    //   );
+    //   return (
+    //     notif.type !== "request" &&
+    //     notif.user.id.toString() !== req.user._id.toString()
+    //   );
+    // });
 
     friend.notifications.push({
       _id: new mongoose.Types.ObjectId(),

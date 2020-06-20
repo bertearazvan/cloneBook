@@ -27,12 +27,16 @@ const PostsRoute = require("./api/Posts");
 const NotificationsRoute = require("./api/Notifications");
 const FriendsRoute = require("./api/Friends");
 const MessagesRoute = require("./api/Messages");
+const CommentsRoute = require("./api/Comments");
+const RepliesRoute = require("./api/Replies");
 // const SSE = require("./api/SSE");
 app.use(UsersRoute);
 app.use(PostsRoute);
 app.use(NotificationsRoute);
 app.use(FriendsRoute);
 app.use(MessagesRoute);
+app.use(CommentsRoute);
+app.use(RepliesRoute);
 // app.use(SSE);
 // Sapper Middleware
 app.use(

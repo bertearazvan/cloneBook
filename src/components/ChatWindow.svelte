@@ -147,8 +147,9 @@
   }
 
   .messagesContainer {
-    height: 14rem;
+    max-height: 14rem;
     overflow: auto;
+    grid-auto-rows: minmax(min-content, max-content);
   }
 </style>
 

@@ -6,15 +6,21 @@
   export let commentId;
   export let onReplyForm;
   export let onDeleteReply;
-  import { profile } from "./../store.js";
 
-  $: currentPost = $profile.posts.filter(post => post.id === postId);
-  $: currentComment = currentPost[0].comments.filter(
-    comment => comment.id === commentId
-  );
-  $: currentReply = currentComment[0].replies.filter(
-    item => item.id === reply.id
-  )[0];
+  import { getRequest } from "./../utils/getRequest.js";
+  import { postRequest } from "./../utils/postRequest.js";
+
+  import { profile, storePosts } from "./../store.js";
+
+  import { onMount } from "svelte";
+
+  $: currentPost = $storePosts.filter(post => post._id === postId);
+  $: currentComment =
+    currentPost[0] &&
+    currentPost[0].comments.filter(comment => comment._id === commentId);
+  $: currentReply =
+    currentComment[0] &&
+    currentComment[0].replies.filter(item => item._id === reply._id)[0];
 
   let replyBody;
 
@@ -22,19 +28,53 @@
   let like = false;
   let editingReply = false;
 
-  let myLike = reply.likes.find(item => item.id === $profile.id);
-  if (myLike) {
+  $: myLike =
+    currentReply && currentReply.likes.find(item => item.id === $profile._id);
+  $: if (myLike) {
     like = true;
   }
 
-  const onSaveEditReply = () => {
-    console.log("Save");
-    currentReply.comment_body = replyBody.innerText;
+  onMount(() => {
+    console.log(currentReply);
+    setInterval(() => {
+      checkReplyLikes();
+    }, 3000);
+  });
 
-    editingReply = false;
-    replyBody.style.marginTop = "";
-    replyBody.style.outline = "";
-    replyBody.style.padding = "";
+  const checkReplyLikes = async () => {
+    let response = await getRequest("/replies/likes", {
+      userId: currentPost[0].user.id,
+      postId: currentPost[0]._id,
+      commentId: currentComment[0]._id,
+      replyId: currentReply._id
+    });
+
+    if (response.likes.length !== currentReply.likes.length) {
+      // console.log(response);
+      currentReply.likes = response.likes;
+    }
+  };
+
+  const onSaveEditReply = async () => {
+    console.log("Save");
+
+    let response = await getRequest("/replies/update", {
+      userId: currentPost[0].user.id,
+      postId: currentPost[0]._id,
+      commentId: currentComment[0]._id,
+      replyId: currentReply._id,
+      replyBody: replyBody.innerText
+    });
+    console.log(response);
+
+    if (response.type === "success") {
+      currentReply.comment_body = replyBody.innerText;
+
+      editingReply = false;
+      replyBody.style.marginTop = "";
+      replyBody.style.outline = "";
+      replyBody.style.padding = "";
+    }
   };
 
   const onCancelEditReply = () => {
@@ -57,16 +97,27 @@
     }, 200);
   };
 
-  const onLikeReply = () => {
-    let myLike = currentReply.likes.find(item => item.id === $profile.id);
-    if (myLike === undefined) {
-      currentReply.likes = [...currentReply.likes, $profile.public_json];
-      like = true;
-    } else {
-      currentReply.likes = currentReply.likes.filter(
-        currentLike => currentLike.id != $profile.id
-      );
-      like = false;
+  const onLikeReply = async () => {
+    let form = new FormData();
+
+    form.append("userId", currentPost[0].user.id);
+    form.append("postId", currentPost[0]._id);
+    form.append("commentId", currentComment[0]._id);
+    form.append("replyId", currentReply._id);
+    let response = await postRequest("/replies/likes", form);
+
+    console.log("myLike", myLike);
+
+    if (response.type === "success") {
+      if (myLike === undefined) {
+        currentReply.likes = [...currentReply.likes, $profile.public_json];
+        like = true;
+      } else {
+        currentReply.likes = currentReply.likes.filter(
+          currentLike => currentLike.id != $profile._id
+        );
+        like = false;
+      }
     }
     // console.log(currentReply);
   };
@@ -99,75 +150,79 @@
 </style>
 
 <!-- <Comment comment={reply} /> -->
-<div class="commentItemReply grid m-2">
-  <IconThumbnail width="2rem" photoUrl={reply.user.photo} />
-  <div>
-    <div class="relative flex">
-      <div class="commentBox relative bg-gray-200 rounded-lg p-2">
-        <p class="font-large text-sm">
-          {reply.user.firstName + ' ' + reply.user.lastName}
-        </p>
-        <p
-          class="font-medium"
-          bind:this={replyBody}
-          contenteditable={editingReply}>
-          {reply.comment_body}
-        </p>
-        <div class="flex text-sm">
-          {#if editingReply}
-            <p
-              class="editCommentActions p-1"
-              style="color: #718096"
-              on:click={onSaveEditReply}>
-              Save
-            </p>
-            <p
-              class="editCommentActions p-1"
-              style="color: #718096"
-              on:click={onCancelEditReply}>
-              Cancel
-            </p>
+{#if currentReply}
+  <div class="commentItemReply grid m-2">
+    <IconThumbnail width="2rem" photoUrl={currentReply.user.photo} />
+    <div>
+      <div class="relative flex">
+        <div class="commentBox relative bg-gray-200 rounded-lg p-2">
+          <p class="font-large text-sm">
+            {currentReply.user.firstName + ' ' + currentReply.user.lastName}
+          </p>
+          <p
+            class="font-medium"
+            bind:this={replyBody}
+            contenteditable={editingReply}>
+            {currentReply.comment_body}
+          </p>
+          <div class="flex text-sm">
+            {#if editingReply}
+              <p
+                class="editCommentActions p-1"
+                style="color: #718096"
+                on:click={onSaveEditReply}>
+                Save
+              </p>
+              <p
+                class="editCommentActions p-1"
+                style="color: #718096"
+                on:click={onCancelEditReply}>
+                Cancel
+              </p>
+            {/if}
+          </div>
+          {#if currentReply.likes.length > 0}
+            <div
+              class="likeCounterComment absolute bg-white shadow w-auto h-6
+              rounded-full grid grid-cols-2 p-1">
+              <div class="flex items-center justify-center">
+                <img class="w-4" src="/images/like.svg" alt="like" />
+              </div>
+
+              <div class="flex items-center justify-center">
+                <p class="text-xs text-gray-700 font-medium">
+                  {currentReply.likes.length}
+                </p>
+              </div>
+            </div>
           {/if}
         </div>
-        {#if currentReply.likes.length > 0}
-          <div
-            class="likeCounterComment absolute bg-white shadow w-auto h-6
-            rounded-full grid grid-cols-2 p-1">
-            <div class="flex items-center justify-center">
-              <img class="w-4" src="/images/like.svg" alt="like" />
-            </div>
-
-            <div class="flex items-center justify-center">
-              <p class="text-xs text-gray-700 font-medium">
-                {currentReply.likes.length}
-              </p>
-            </div>
-          </div>
-        {/if}
+        <div>
+          <EditDots
+            onEdit={onChangeReply}
+            onDelete={() => onDeleteReply(currentReply._id)}
+            openEdit={currentReply.user.id === $profile._id ? true : false} />
+        </div>
       </div>
-      <div>
-        <EditDots
-          onEdit={onChangeReply}
-          onDelete={() => onDeleteReply(currentReply.id)}
-          openEdit={currentReply.user.id === $profile.id ? true : false} />
+      <div class="text-sm ml-3 text-gray-600">
+        <p>
+          <span
+            style={like ? 'color: #2078f4' : 'color: #718096'}
+            class="commentReply cursor-pointer"
+            on:click={() => onLikeReply(currentReply)}>
+            Like
+          </span>
+          ·
+          <span
+            class="commentReply cursor-pointer"
+            on:click={onReplyForm(currentReply)}>
+            Reply
+          </span>
+          ·
+          <span class="font-medium">1d</span>
+        </p>
       </div>
-    </div>
-    <div class="text-sm ml-3 text-gray-600">
-      <p>
-        <span
-          style={like ? 'color: #2078f4' : 'color: #718096'}
-          class="commentReply cursor-pointer"
-          on:click={() => onLikeReply(reply)}>
-          Like
-        </span>
-        ·
-        <span class="commentReply cursor-pointer" on:click={onReplyForm(reply)}>
-          Reply
-        </span>
-        ·
-        <span class="font-medium">1d</span>
-      </p>
-    </div>
 
+    </div>
   </div>
-</div>
+{/if}

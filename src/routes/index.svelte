@@ -6,6 +6,7 @@
   import ActionsLeft from "../sections/ActionsLeft.svelte";
 
   import { getRequest } from "./../utils/getRequest.js";
+  import { checkSession } from "./../utils/checkSession.js";
 
   import { profile } from "./../store.js";
   import { storePosts } from "./../store.js";
@@ -29,7 +30,15 @@
   onMount(() => {
     getDataUser();
     getPosts();
+    getSession();
   });
+
+  const getSession = async () => {
+    let response = await getRequest("/users/session");
+    if (response.type !== "success" || !localStorage.getItem("token")) {
+      location.href = `/login`;
+    }
+  };
 
   const getPosts = async () => {
     let response = await getRequest("/posts");

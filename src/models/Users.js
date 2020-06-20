@@ -24,20 +24,21 @@ const publicJsonSchema = mongoose.Schema(
 
 const replySchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  comment_body: "String",
+  comment_body: String,
   timestamp: { type: Date, default: Date.now },
   likes: [publicJsonSchema],
   post_id: mongoose.Schema.Types.ObjectId,
-  user: [publicJsonSchema],
+  comment_id: mongoose.Schema.Types.ObjectId,
+  user: publicJsonSchema,
 });
 
 const commentSchema = mongoose.Schema({
   _id: mongoose.Schema.Types.ObjectId,
-  comment_body: "String",
+  comment_body: String,
   timestamp: { type: Date, default: Date.now },
   likes: [publicJsonSchema],
   post_id: mongoose.Schema.Types.ObjectId,
-  user: [publicJsonSchema],
+  user: publicJsonSchema,
   replies: [replySchema],
 });
 

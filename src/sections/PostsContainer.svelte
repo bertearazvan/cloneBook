@@ -9,7 +9,6 @@
 
   const onOpenModal = () => {
     $postModal.show = true;
-    console.log($postModal);
   };
 </script>
 

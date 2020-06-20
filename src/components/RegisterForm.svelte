@@ -11,7 +11,9 @@
     let data = new FormData(e.target);
     let response = await postRequest("/users/signup", data);
     console.log(response);
-
+    if (response.type === "success") {
+      onChangeForm("login");
+    }
     // console.log("Register ");
   };
 </script>

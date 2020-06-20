@@ -8,7 +8,6 @@
   import moment from "moment";
 
   onMount(async () => {
-    let response = await getRequest("/notifications");
     setInterval(() => {
       checkForNotifications();
       checkForMessages();
@@ -16,10 +15,11 @@
     // console.log(response);
   });
 
-  $: activeAction = "";
   let showActionsBox;
   let bindBoxActions;
   let showRequestActions = true;
+
+  $: activeAction = "";
   $: boxContent = [];
   $: newNotifications = "";
   $: newMessages = "";
@@ -48,7 +48,7 @@
           }
         }
       }
-      console.log(accumulator);
+      // console.log(accumulator);
       newMessages = accumulator;
     }
   };
@@ -62,7 +62,26 @@
     $profile.friends = friends.friends;
     $profile.notifications = response.notifications;
 
-    boxContent = $profile.notifications;
+    let reducedNotifications = $profile.notifications.reduce(
+      (accumulator, item) => {
+        if (item.type === "request") {
+          let findNotification = accumulator.find(
+            notif => notif.type === "request" && notif.user.id === item.user.id
+          );
+
+          if (!findNotification) {
+            accumulator = [...accumulator, item];
+          }
+        } else {
+          accumulator = [...accumulator, item];
+        }
+
+        return accumulator;
+      },
+      []
+    );
+
+    boxContent = reducedNotifications;
 
     newNotifications = "";
     showActionsBox = true;
@@ -77,7 +96,6 @@
   const getMessages = async () => {
     activeAction = "messages";
     let response = await getRequest("/friends");
-    console.log(response.friends);
 
     response.friends = response.friends.sort((a, b) => {
       if (a.chat.length > 0 && b.chat.length > 0) {
@@ -93,7 +111,6 @@
         return -1;
       }
     });
-    console.log(response.friends);
     $profile.friends = response.friends;
 
     newMessages = "";
@@ -362,7 +379,7 @@
                   </span>
                 </p>
                 <p class="font-normal">
-                  {item.chat[item.chat.length - 1].message}
+                  {@html item.chat[item.chat.length - 1].message}
                 </p>
               </div>
             </div>

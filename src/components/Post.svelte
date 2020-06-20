@@ -19,6 +19,7 @@
     like = false;
     setInterval(() => {
       checkLikes();
+      // console.log("now");
     }, 3000);
   });
 
@@ -76,32 +77,41 @@
     }
   };
 
-  const deleteComment = id => {
+  const deleteComment = async id => {
     // console.log(id);
-    currentPost.comments = currentPost.comments.filter(
-      comment => comment.id !== id
-    );
 
-    post.comments = post.comments.filter(comment => comment.id !== id);
+    let response = await getRequest("/comments/delete", {
+      commentId: id,
+      postId: currentPost._id,
+      userId: currentPost.user.id
+    });
+
+    if (response.type === "success") {
+      currentPost.comments = currentPost.comments.filter(
+        comment => comment._id !== id
+      );
+    }
+
+    // send comment Id, postId, userId
   };
 
-  const onAddComment = e => {
+  const onAddComment = async e => {
     e.preventDefault();
-    let newComment = {
-      id: currentPost.comments.length + 1,
-      comment_body: commentInput.value,
-      likes: [],
-      post_id: currentPost.id,
-      replies: [],
-      timestamp: "now",
-      user: $profile.public_json
-    };
-    commentInput.value = "";
-    // post.comments = [newComment, ...post.comments];
-    // console.log(commentInput.value);
-    currentPost.comments = [...currentPost.comments, newComment];
-    currentPost.comments = currentPost.comments;
-    console.log(currentPost.comments);
+    if (commentInput.value !== "") {
+      let form = new FormData();
+      form.append("commentBody", commentInput.value);
+      form.append("postId", currentPost._id);
+      form.append("userId", currentPost.user.id);
+
+      let response = await postRequest("/comments", form);
+
+      console.log(response.comment);
+
+      if (response.type === "success") {
+        commentInput.value = "";
+        currentPost.comments = [response.comment, ...currentPost.comments];
+      }
+    }
   };
 
   const onEditPost = () => {
@@ -275,10 +285,10 @@
               </form>
               <div class="commentList">
                 {#if openComments}
-                  {#each post.comments as comment}
+                  {#each currentPost.comments as comment}
                     <Comment
                       {comment}
-                      postId={post.id}
+                      postId={currentPost._id}
                       onDeleteComment={data => deleteComment(data)} />
                   {/each}
                 {/if}

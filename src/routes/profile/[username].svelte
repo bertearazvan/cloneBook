@@ -30,6 +30,7 @@
   onMount(() => {
     getDataUser();
     getPosts();
+    getSession();
     // console.log(currentFriend);
   });
 
@@ -45,6 +46,13 @@
 
   $: currentProfile = $profile._id === user._id ? $profile : undefined;
   $: currentFriend = $profile.friends.find(friend => friend.id === user._id);
+
+  const getSession = async () => {
+    let response = await getRequest("/users/session");
+    if (response.type !== "success" || !localStorage.getItem("token")) {
+      location.href = `/login`;
+    }
+  };
 
   const getDataUser = async () => {
     let response = await getRequest("/profile");
