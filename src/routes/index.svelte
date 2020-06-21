@@ -42,7 +42,7 @@
 
   const getPosts = async () => {
     let response = await getRequest("/posts");
-    console.log(response.posts);
+    // console.log(response.posts);
     $storePosts = response.posts;
     loading = false;
   };
@@ -51,7 +51,7 @@
     let response = await getRequest("/profile");
     // console.log(response);
     $profile = response.user;
-    console.log($profile);
+    // console.log($profile);
   };
 
   // $: posts = $storePosts;
@@ -63,6 +63,22 @@
     grid-template-columns: 25fr 55fr 20fr;
   }
 
+  /* Medium (md) */
+  @media (max-width: 768px) {
+    /* ... */
+    #wrapper {
+      grid-template-columns: 75fr 25fr;
+    }
+  }
+
+  /* Medium (md) */
+  @media (max-width: 640px) {
+    /* ... */
+    #wrapper {
+      grid-template-columns: 100fr;
+    }
+  }
+
   .chatWrapper {
     min-height: 90vh;
     overflow: auto;
@@ -70,12 +86,15 @@
 </style>
 
 <div id="wrapper" class="grid gap-4">
-  <ActionsLeft />
+  <div class="hidden md:block">
+
+    <ActionsLeft />
+  </div>
   <div class="flex justify-center">
-    <PostsContainer posts={$storePosts} />
+    <PostsContainer posts={$storePosts} toUser={$profile._id} />
   </div>
 
-  <div class="grid chatWrapper mr-4">
+  <div class="grid chatWrapper mr-4 hidden sm:block">
     <FriendsRight />
   </div>
 

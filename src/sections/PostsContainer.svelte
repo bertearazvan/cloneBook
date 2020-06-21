@@ -4,17 +4,20 @@
   import { profile, storePosts, postModal } from "../store.js";
 
   // $: posts = $profile.posts;
+  export let toUser;
   export let posts;
   // console.log($storePosts);
 
   const onOpenModal = () => {
     $postModal.show = true;
+    $postModal.toUser = toUser;
   };
 </script>
 
 <style>
   section {
     max-width: 680px;
+    width: 100%;
   }
 
   #postInput {
@@ -37,7 +40,11 @@
   <div id="postFormContainer" class="bg-white h-32 p-3 shadow rounded-lg">
     <form>
       <div id="postInput" class="grid pb-4">
-        <IconThumbnail photoUrl={$profile.photo} width="2.5rem" />
+        <div
+          class="cursor-pointer"
+          on:click={() => (window.location.href = `profile/${$profile.username}`)}>
+          <IconThumbnail photoUrl={$profile.photo} width="2.5rem" />
+        </div>
         <div
           class="rounded-full w-full bg-gray-200 p-2 cursor-pointer"
           on:click={onOpenModal}>
@@ -50,19 +57,25 @@
           class="actionTab flex items-center justify-center cursor-pointer
           rounded-lg">
           <img src="/images/action_media.png" alt="profile" />
-          <p class="p-2" on:click={onOpenModal}>Photo/Video</p>
+          <p class="p-2 text-xs lg:text-base" on:click={onOpenModal}>
+            Photo/Video
+          </p>
         </div>
         <div
           class="actionTab flex items-center justify-center cursor-pointer
           rounded-lg">
           <img src="/images/action_friends.png" alt="profile" />
-          <p class="p-2" on:click={onOpenModal}>Tag Friends</p>
+          <p class="p-2 text-xs lg:text-base" on:click={onOpenModal}>
+            Tag Friends
+          </p>
         </div>
         <div
           class="actionTab flex items-center justify-center cursor-pointer
           rounded-lg">
           <img src="/images/action_activity.png" alt="profile" />
-          <p class="p-2" on:click={onOpenModal}>Feeling/Activity</p>
+          <p class="p-2 text-xs lg:text-base" on:click={onOpenModal}>
+            Feeling/Activity
+          </p>
         </div>
       </div>
     </form>
@@ -70,7 +83,7 @@
   </div>
   <section id="postsSectionContainer">
     {#if posts}
-      {#each posts as post}
+      {#each posts.sort((a, b) => b.timestamp - a.timestamp) as post}
         <Post {post} />
       {/each}
     {/if}

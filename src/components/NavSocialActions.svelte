@@ -2,6 +2,7 @@
   // ####
   import { profile } from "./../store.js";
   import IconThumbnail from "./IconThumbnail.svelte";
+  import FriendThumbnail from "./FriendThumbnail.svelte";
   import { getRequest } from "./../utils/getRequest";
   import { fromNowOrNow } from "./../utils/fromNowOrNow";
   import { onMount } from "svelte";
@@ -11,7 +12,7 @@
     setInterval(() => {
       checkForNotifications();
       checkForMessages();
-    }, 3000);
+    }, 10000);
     // console.log(response);
   });
 
@@ -27,7 +28,12 @@
   const checkForNotifications = async () => {
     let response = await getRequest("/notifications");
 
-    if (response.notifications.length > $profile.notifications.length) {
+    if (
+      response.notifications.filter(notif => notif.user.id !== $profile._id)
+        .length >
+      $profile.notifications.filter(notif => notif.user.id !== $profile._id)
+        .length
+    ) {
       newNotifications =
         response.notifications.length - $profile.notifications.length;
     }
@@ -80,8 +86,10 @@
       },
       []
     );
-
-    boxContent = reducedNotifications;
+    console.log(reducedNotifications);
+    boxContent = reducedNotifications.filter(
+      notif => notif.user.id !== $profile._id
+    );
 
     newNotifications = "";
     showActionsBox = true;
@@ -132,6 +140,7 @@
       user.activeChat = true;
       $profile.activeChats = [user, ...$profile.activeChats];
     }
+    showActionsBox = false;
   };
 
   const onAccept = async item => {
@@ -175,6 +184,17 @@
 
     // we want to get message, success, friendId
   };
+
+  const onSignOut = async () => {
+    // sign out from backend
+
+    let response = await getRequest("/users/signOut");
+    if (response.type === "success") {
+      console.log("sign out");
+      localStorage.clear();
+      window.location.href = "/login";
+    }
+  };
 </script>
 
 <style>
@@ -186,6 +206,15 @@
     cursor: pointer;
     transition: 0.3s ease all;
     margin: 0px 0.5rem;
+  }
+
+  /* Small (sm) */
+  @media (max-width: 640px) {
+    /* ... */
+    .actionButtonsNav {
+      width: 2rem;
+      height: 2rem;
+    }
   }
 
   .actionButtonsNav:hover {
@@ -256,7 +285,7 @@
     <div
       class="actionButtonsNav relative flex items-center justify-center"
       on:click={getMessages}
-      style={activeAction === 'messages' ? 'background-color: #E7F3FF;' : 'background-color: #f0f2f5'}>
+      style={activeAction === 'messages' && 'background-color: #E7F3FF;'}>
       <svg viewBox="0 0 28 28" height="20" width="20">
         <path
           d="M14 2.042c6.76 0 12 4.952 12 11.64S20.76 25.322 14 25.322a13.091
@@ -279,7 +308,7 @@
       <div
         class="actionButtonsNav relative flex items-center justify-center"
         on:click={getNotifications}
-        style={activeAction === 'notifications' ? 'background-color: #E7F3FF;' : 'background-color: #f0f2f5'}>
+        style={activeAction === 'notifications' && 'background-color: #E7F3FF;'}>
         <svg viewBox="0 0 28 28" height="20" width="20">
           <path
             d="M7.847 23.488C9.207 23.488 11.443 23.363 14.467 22.806 13.944
@@ -301,6 +330,11 @@
         {/if}
       </div>
     </div>
+    <div
+      class="actionButtonsNav relative flex items-center justify-center"
+      on:click={onSignOut}>
+      <i class="fas fa-sign-out-alt" style="font-size: 1.1rem; color: black;" />
+    </div>
   </div>
   {#if showActionsBox}
     <div
@@ -317,7 +351,12 @@
           <div class="contentBoxItem flex items-center cursor-pointer">
             <div class="notificationItem w-full h-full grid gap-1">
               <div class="flex items-center justify-center">
-                <IconThumbnail photoUrl={item.user.photo} width="2.6rem" />
+                <FriendThumbnail
+                  width="2rem"
+                  photo={item.user.photo}
+                  friendId={item.user.id} />
+                <!-- {console.log(item)}
+                <IconThumbnail photoUrl={item.user.photo} width="2.6rem" /> -->
               </div>
               <div>
                 {#if item.type === 'request'}
@@ -368,7 +407,11 @@
               class="notificationItem w-full h-full grid gap-1"
               on:click={showChatWindow(item)}>
               <div class="flex items-center justify-center">
-                <IconThumbnail photoUrl={item.photo} width="3rem" />
+
+                <FriendThumbnail
+                  width="2rem"
+                  photo={item.photo}
+                  friendId={item.id} />
               </div>
               <div class="p-2">
                 <p class="flex items-center">

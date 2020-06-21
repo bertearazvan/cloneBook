@@ -228,6 +228,7 @@ export let profile = writable({
 export let storePosts = writable([]);
 
 export let postModal = writable({
-  show: false,
-  postData: undefined,
+  show: false, // true || false
+  postData: undefined, // undefined || object
+  toFriend: undefined, // undefined || id
 });

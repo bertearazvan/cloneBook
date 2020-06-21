@@ -18,7 +18,8 @@
 
 <style>
   nav {
-    grid-template-columns: 25fr 55fr 20fr;
+    grid-template-columns: 30fr 40fr 30fr;
+    width: 100%;
   }
 
   .navC1 {
@@ -35,13 +36,19 @@
     grid-template-columns: 2fr 2fr;
   }
 
-  /* .flex-center i {
-    transition: 0.2s ease;
+  /* Small (sm) */
+  @media (max-width: 640px) {
+    nav {
+      grid-template-columns: 30fr 70fr;
+    }
+    .navC3 {
+      grid-template-columns: 2fr 8fr;
+    }
+    .navC1 {
+      grid-template-columns: 2fr 8fr;
+      min-width: 200px;
+    }
   }
-
-  .flex-center i:hover {
-    font-size: 1.3rem;
-  } */
 
   .profileIcon {
     transition: 0.2s ease;
@@ -55,21 +62,21 @@
 
 {#if showNav}
   <nav
-    class="fixed grid gap-4 items-center w-full h-16 py-0 px-2 text-gray-700
-    bg-white shadow z-10">
-    <div class="navC1 grid">
+    class="fixed grid gap-1 sm:gap-4 items-center w-full h-16 py-0 px-2
+    text-gray-700 bg-white shadow z-10">
+    <div class="navC1 grid items-center">
       <!-- aria-current={segment === undefined ? 'page' : undefined} -->
       <a href=".">
         <img
-          class="w-12 h-auto rounded-full"
+          class="w-8 sm:w-12 h-auto rounded-full"
           src="/images/PhoneBook_logo.png"
           alt="CloneBook" />
       </a>
       <SearchBar />
 
     </div>
-    <div class="navC2 grid grid-cols-1">
-      <svg viewBox="0 0 28 28" height="28" width="28">
+    <div class="navC2 hidden md:block grid grid-cols-1">
+      <svg viewBox="0 0 28 28" height="28" width="28" class="hidden">
         <path
           d="M25.825 12.29C25.824 12.289 25.823 12.288 25.821 12.286L15.027
           2.937C14.752 2.675 14.392 2.527 13.989 2.521 13.608 2.527 13.248 2.675
@@ -85,7 +92,7 @@
 
     </div>
     <div class="navC3 grid gap-4">
-      <div class="flex items-center justify-center">
+      <div class="hidden sm:block flex items-center justify-center">
         <a href={'profile/' + $profile.username}>
           <div
             class="profileIcon grid grid-cols-2 gap-2 rounded-full p-2
@@ -94,7 +101,7 @@
             <div class="flex items-center justify-center flex-center">
               <IconThumbnail photoUrl={$profile.photo} width="2.2rem" />
             </div>
-            <div class="flex items-center justify-center flex-center">
+            <div class="hidden sm:flex items-center justify-center flex-center">
               <p>{$profile.firstName}</p>
             </div>
 

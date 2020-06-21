@@ -20,7 +20,7 @@
     setInterval(() => {
       checkLikes();
       // console.log("now");
-    }, 3000);
+    }, 10000);
   });
 
   // console.log($profile, $storePosts);
@@ -245,29 +245,31 @@
           </div>
 
         </div>
-        <div class="actionContainerStatus text-gray-600 grid grid-cols-3 h-12">
+        <div class="actionContainerStatus text-gray-600 grid grid-cols-2 h-12">
           <div class="actionTab likeBtn" on:click={onLikePost}>
             <i
               class=" far fa-thumbs-up"
               style={myLike ? 'color: #2078f4' : 'color: #718096'} />
-            <p style={myLike ? 'color: #2078f4' : 'color: #718096'} class="p-1">
+            <p
+              style={myLike ? 'color: #2078f4' : 'color: #718096'}
+              class="p-1 text-xs lg:text-base">
               Like
             </p>
           </div>
           <div class="actionTab">
             <i class="far fa-comment-alt" />
             <p
-              class="p-1"
+              class="p-1 text-xs lg:text-base"
               on:click={() => {
                 document.querySelector('#commentInput').focus();
               }}>
               Comment
             </p>
           </div>
-          <div class="actionTab">
+          <!-- <div class="actionTab">
             <i class="fas fa-share-square" />
-            <p class="p-1">Share</p>
-          </div>
+            <p class="p-1 text-xs lg:text-base">Share</p>
+          </div> -->
         </div>
         <div class="commentsContainer">
           <div>

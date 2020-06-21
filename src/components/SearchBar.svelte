@@ -9,14 +9,6 @@
   let showSearchResults = false;
   let bindSearchResults;
 
-  //   const showSearchResults = () => {
-  //     searchResultsDisplay = "grid";
-  //   };
-
-  // const hideSearchResults = () => {
-  //   searchResultsDisplay = "none";
-  // };
-
   // connect and get data - takes time
   const getData = async e => {
     // results = [];
@@ -24,9 +16,9 @@
     let response = await getRequest("/users/search", {
       searchItem: e.target.value
     });
-    setTimeout(() => {
-      bindSearchResults.focus();
-    }, 200);
+    // setTimeout(() => {
+    //   bindSearchResults.focus();
+    // }, 200);
 
     console.log(response.result);
 
@@ -39,6 +31,8 @@
   /* ### */
   div#searchResults {
     position: absolute;
+    display: relative;
+    overflow: auto;
     width: 100%;
     max-height: 20rem;
     background: white;
@@ -88,6 +82,11 @@
       on:input={e => {
         getData(e);
         showSearchResults = true;
+      }}
+      on:blur={() => {
+        setTimeout(() => {
+          showSearchResults = false;
+        }, 300);
       }} />
   </form>
   {#if showSearchResults}
@@ -95,23 +94,31 @@
       id="searchResults"
       bind:this={bindSearchResults}
       class="rounded-lg pt-6 pb-4 px-2 shadow-lg"
-      on:click={(showSearchResults = true)}
-      tabindex="0"
-      on:blur={() => {
-        showSearchResults = false;
-      }}>
-      {#each results as result}
+      on:click={() => {
+        showSearchResults = true;
+        bindSearchResults.focus();
+      }}
+      tabindex="0">
+      {#if results.length > 0}
+        {#each results as result}
+          <div
+            class="searchItem scroll-auto px-1 py-2 flex rounded-md
+            cursor-pointer items-center justify-start"
+            on:click={() => {
+              showSearchResults = true;
+              location.href = `/profile/${result.username}`;
+            }}>
+            <IconThumbnail photoUrl={result.photo} width="2rem" />
+            <p>{result.firstName} {result.lastName}</p>
+          </div>
+        {/each}
+      {:else}
         <div
-          class="searchItem px-1 py-2 flex rounded-md cursor-pointer
-          items-center justify-start"
-          on:click={() => {
-            showSearchResults = true;
-            location.href = `/profile/${result.username}`;
-          }}>
-          <IconThumbnail photoUrl={result.photo} width="2rem" />
-          <p>{result.firstName} {result.lastName}</p>
+          class="searchItem scroll-auto px-1 py-2 flex rounded-md cursor-pointer
+          items-center justify-start">
+          <p>Sorry, no results...</p>
         </div>
-      {/each}
+      {/if}
     </div>
   {/if}
 </div>

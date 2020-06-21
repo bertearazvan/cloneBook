@@ -9,6 +9,7 @@
 
   import { getRequest } from "./../utils/getRequest.js";
   import { postRequest } from "./../utils/postRequest.js";
+  import { fromNowOrNow } from "./../utils/fromNowOrNow.js";
 
   import { profile, storePosts } from "./../store.js";
 
@@ -35,10 +36,9 @@
   }
 
   onMount(() => {
-    console.log(currentReply);
     setInterval(() => {
       checkReplyLikes();
-    }, 3000);
+    }, 15000);
   });
 
   const checkReplyLikes = async () => {
@@ -141,7 +141,7 @@
   }
 
   .commentBox {
-    min-width: 400px;
+    min-width: 80%;
   }
 
   .editCommentActions {
@@ -152,7 +152,12 @@
 <!-- <Comment comment={reply} /> -->
 {#if currentReply}
   <div class="commentItemReply grid m-2">
-    <IconThumbnail width="2rem" photoUrl={currentReply.user.photo} />
+    <div
+      class="cursor-pointer"
+      on:click={() => (window.location.href = `profile/${currentReply.user.username}`)}>
+
+      <IconThumbnail width="2rem" photoUrl={currentReply.user.photo} />
+    </div>
     <div>
       <div class="relative flex">
         <div class="commentBox relative bg-gray-200 rounded-lg p-2">
@@ -219,7 +224,9 @@
             Reply
           </span>
           ·
-          <span class="font-medium">1d</span>
+          <span class="font-medium">
+            {fromNowOrNow(currentReply.timestamp)}
+          </span>
         </p>
       </div>
 

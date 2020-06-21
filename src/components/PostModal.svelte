@@ -52,19 +52,10 @@
   };
 
   const onPost = async () => {
-    // let postObject = {
-    //   id: $profile.posts.length + 1,
-    //   description: inputDescription.value,
-    //   timestamp: "now",
-    //   likes: [],
-    //   photo: imageUrl,
-    //   user: $profile.public_json,
-    //   comments: []
-    // };
-
     let form = new FormData();
     form.append("description", inputDescription.value);
     form.append("image", imageFile);
+    // form.append("userId", $postModal.toUser);
 
     let response = await postRequest("/posts", form);
     // console.log(response.post);
@@ -160,6 +151,17 @@
 
   .postImage {
     border: 0.5px solid #e4e6eb;
+  }
+
+  /* Small (sm) */
+  @media (max-width: 640px) {
+    /* ... */
+    .formBox {
+      width: 90%;
+      min-height: 40%;
+      max-height: 80%;
+      overflow-y: scroll;
+    }
   }
 </style>
 

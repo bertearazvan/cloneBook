@@ -14,11 +14,16 @@
   section {
     height: 50vh;
   }
+
+  /* Small (sm) */
+  @media (max-width: 640px) {
+    /* ... */
+  }
 </style>
 
 <section class="flex items-center justify-center mx-10">
-  <div class="grid gap-4 items-center justify-center grid-cols-2">
-    <div class="items-center justify-center text-gray-800">
+  <div class="grid gap-4 items-center justify-center sm:grid-cols-2">
+    <div class="items-center hidden sm:block justify-center text-gray-800">
       <h1 class="text-2xl max-w-md mb-8">
         Connect with friends and the world around you on CloneBook
       </h1>

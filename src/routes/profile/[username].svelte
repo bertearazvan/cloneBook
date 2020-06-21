@@ -47,6 +47,22 @@
   $: currentProfile = $profile._id === user._id ? $profile : undefined;
   $: currentFriend = $profile.friends.find(friend => friend.id === user._id);
 
+  const showChatWindow = () => {
+    // console.log("showing chat window");
+    // addChatWindow(friend);
+
+    let checkFriend = $profile.activeChats.find(
+      friend => friend.id === user._id
+    );
+
+    let userToSend = $profile.friends.find(friend => friend.id === user._id);
+
+    if (checkFriend === undefined) {
+      userToSend.activeChat = true;
+      $profile.activeChats = [userToSend, ...$profile.activeChats];
+    }
+  };
+
   const getSession = async () => {
     let response = await getRequest("/users/session");
     if (response.type !== "success" || !localStorage.getItem("token")) {
@@ -65,7 +81,7 @@
     let response = await getRequest("/posts");
     // console.log(response.posts);
     $storePosts = response.posts;
-    console.log($storePosts);
+    // console.log($storePosts);
   };
 
   const selectCover = e => {
@@ -82,14 +98,32 @@
     profileUrl = URL.createObjectURL(event.target.files[0]);
   };
 
-  const onSaveChangeCover = () => {
+  const onSaveChangeCover = async () => {
     console.log("save");
-    currentProfile.coverUrl = "";
+
+    let form = new FormData();
+    form.append("coverImage", coverImageFile);
+
+    let response = await postRequest("/users/addCover", form);
+    console.log(response);
+    if (response.type === "success") {
+      coverUrl = "";
+      user.cover = response.imageUrl;
+    }
   };
 
-  const onSaveChangeProfile = () => {
+  const onSaveChangeProfile = async () => {
     console.log("save");
-    profileUrl = "";
+
+    let form = new FormData();
+    form.append("profileImage", profileImageFile);
+
+    let response = await postRequest("/users/addProfile", form);
+
+    if (response.type === "success") {
+      user.photo = response.imageUrl;
+      profileUrl = "";
+    }
   };
 
   const onAddFriend = async () => {
@@ -104,15 +138,15 @@
     }
   };
 
-  const onSignOut = () => {
-    console.log("sign out");
-    // let response = getRequest("/users/signout");
-    localStorage.clear();
-    window.location.href = "/login";
-  };
-
-  const onDeleteProfile = () => {
+  const onDeleteProfile = async () => {
     console.log("delete profile");
+
+    let response = await getRequest("/users/remove");
+
+    if (response.type === "success") {
+      localStorage.clear();
+      window.location.href = "/login";
+    }
   };
 
   const onRemoveFriend = async () => {
@@ -179,6 +213,42 @@
     grid-template-columns: 4fr 6fr;
   }
 
+  /* Small (sm) */
+  @media (max-width: 768px) {
+    /* ... */
+    .profileBody {
+      grid-template-columns: 1fr;
+    }
+
+    .changeCoverButton {
+      right: 1rem;
+      top: 1rem;
+      bottom: unset !important;
+    }
+
+    .changeCoverActionsContainer {
+      right: 1rem;
+      bottom: unset !important;
+      top: 1rem;
+    }
+  }
+
+  @media (max-width: 1080px) {
+    .actionTab {
+      grid-template-columns: 1fr;
+      height: auto;
+      width: 100%;
+    }
+
+    .containerWrapper {
+      width: 100%;
+    }
+
+    .profileContent {
+      width: 90%;
+    }
+  }
+
   .introBox {
     height: auto;
   }
@@ -230,6 +300,11 @@
     background: #1877f2;
     color: white;
   }
+
+  .changeCoverActionsContainer {
+    right: 1rem;
+    bottom: 0.5rem;
+  }
 </style>
 
 <section
@@ -274,7 +349,7 @@
         </div>
         {#if $profile._id === user._id}
           {#if coverUrl}
-            <div class="absolute flex" style="right: 1rem; bottom: 0.5rem;">
+            <div class="changeCoverActionsContainer absolute flex">
               <div
                 class="changeCoverActions mr-1 flex items-center py-2 px-4
                 rounded-md justify-center"
@@ -318,8 +393,8 @@
           {user.firstName + ' ' + user.lastName}
         </p>
       </div>
-      <div class="actionTab grid grid-cols-2 mx-8 px-2">
-        <div class="h-full flex items-center justify-start">
+      <div class="actionTab grid grid-cols-2 lg:mx-8 px-2">
+        <div class="h-full hidden lg:flex items-center justify-start">
           <div
             style={currentTab === 'timeline' ? 'border-bottom: 3px solid rgb(24, 118, 242);' : 'border-bottom: none;'}
             class="actionTabItem h-full p-2 flex cursor-pointer items-center
@@ -342,7 +417,7 @@
           </div> -->
         </div>
 
-        <div class="flex items-center justify-end">
+        <div class="flex items-center flex-wrap justify-center lg:justify-end">
           {#if $profile._id !== user._id && !currentFriend}
             <div
               class="addFriendButton rounded-md py-2 m-2 px-10 flex items-center
@@ -356,12 +431,6 @@
             <div
               class="addFriendButton rounded-md py-2 m-2 px-10 flex items-center
               justify-center p-4"
-              on:click={onSignOut}>
-              <p>Sign out</p>
-            </div>
-            <div
-              class="addFriendButton rounded-md py-2 m-2 px-10 flex items-center
-              justify-center p-4"
               on:click={onDeleteProfile}>
               <p>Delete profile</p>
             </div>
@@ -371,14 +440,30 @@
             <div
               class="defaultButton rounded-md py-2 m-2 px-10 flex items-center
               justify-center p-4">
-              <p>{currentFriend.friendshipStatus}</p>
+              {#if currentFriend.friendshipStatus === 'accept'}
+                <p>Friends</p>
+              {/if}
+              {#if currentFriend.friendshipStatus === 'pending'}
+                <p>Pending</p>
+              {/if}
+              {#if currentFriend.friendshipStatus === 'decline'}
+                <p>Not accepted</p>
+              {/if}
+              <!-- <p>{currentFriend.friendshipStatus}</p> -->
+
             </div>
             {#if currentFriend.friendshipStatus === 'accept'}
               <div
                 class="addFriendButton rounded-md py-2 m-2 px-10 flex
                 items-center justify-center p-4"
                 on:click={onRemoveFriend}>
-                <p>Remove friend</p>
+                <p>Unfriend</p>
+              </div>
+              <div
+                class="addFriendButton rounded-md py-2 m-2 px-10 flex
+                items-center justify-center p-4"
+                on:click={showChatWindow}>
+                <p>Message</p>
               </div>
             {/if}
           {/if}
@@ -390,9 +475,9 @@
   </div>
 </section>
 
-<section class="profileContent mx-auto flex justify-center">
+<section class="profileContent md:mx-auto flex justify-center">
   <div class="grid w-full mt-4 gap-8 profileBody">
-    <div>
+    <div class="hidden md:block">
       <div
         class="introBox pb-8 mt-4 relative bg-white shadow-lg rounded-lg w-full
         p-4">
@@ -432,7 +517,7 @@
       </div>
     </div>
     {#if user.posts}
-      <PostsContainer posts={user.posts} />
+      <PostsContainer posts={user.posts} toFriend={user._id} />
     {:else}
       <div class="flex justify-center">
         <p>Sorry, there are no posts to show...</p>

@@ -1,6 +1,7 @@
 <script>
   import { onMount, afterUpdate } from "svelte";
   import IconThumbnail from "./IconThumbnail.svelte";
+  import FriendThumbnail from "./FriendThumbnail.svelte";
   import { profile } from "../store.js";
   import { getRequest } from "./../utils/getRequest.js";
   import io from "socket.io-client";
@@ -164,8 +165,8 @@
           open = true;
         }}>
         <div id="chatBar" class="w-full grid cursor-pointer">
-          <div class="flex intems-center">
-            <IconThumbnail width="1.4rem" photoUrl={user.photo} />
+          <div class="flex items-center">
+            <FriendThumbnail photo={user.photo} friendId={user.id} />
             <p class="ml-2">{user.firstName}</p>
           </div>
 
@@ -183,7 +184,7 @@
           cursor-pointer"
           on:click={minimizeChat}>
           <div class="flex items-center">
-            <IconThumbnail width="1.4rem" photoUrl={user.photo} />
+            <FriendThumbnail photo={user.photo} friendId={user.id} />
             <p class="ml-2">{user.firstName + ' ' + user.lastName}</p>
           </div>
           <div class="closeChatWindow flex items-center justify-end mr-1">
@@ -236,7 +237,7 @@
             class="chatLikeButton flex items-center justify-center
             cursor-pointer"
             on:click={() => {
-              bindInput.value = ':like:';
+              socket.emit('message', $profile._id, currentFriend.id, ':like:');
             }}>
             <img src="/images/like.png" style="width: 18px;" alt="like" />
             <!-- <i class=" far fa-thumbs-up" style="color: #0099ff;" /> -->

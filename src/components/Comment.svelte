@@ -40,7 +40,7 @@
     like = false;
     setInterval(() => {
       checkCommentLikes();
-    }, 5000);
+    }, 15000);
   });
 
   const checkCommentLikes = async () => {
@@ -209,7 +209,7 @@
   }
 
   .commentBox {
-    min-width: 500px;
+    min-width: 90%;
   }
 
   .editCommentActions {
@@ -218,10 +218,15 @@
 </style>
 
 {#if currentComment}
-  <div class="commentItem flex justify-center m-2 mb-4">
-    <IconThumbnail width="2.5rem" photoUrl={currentComment.user.photo} />
+  <div class="commentItem flex justify-start m-2 mb-4">
+    <div
+      class="cursor-pointer"
+      on:click={() => (window.location.href = `profile/${currentComment.user.username}`)}>
+      <IconThumbnail width="2.5rem" photoUrl={currentComment.user.photo} />
+    </div>
+
     <div>
-      <div class="relative flex">
+      <div class="relative flex flex-start">
         <div class="commentBox relative bg-gray-200 rounded-lg px-4 py-2">
           <p class="font-large text-sm">
             {currentComment.user.firstName + ' ' + currentComment.user.lastName}

@@ -95,6 +95,7 @@ const userSchema = mongoose.Schema({
   activeChats: [],
   friends: [friendSchema],
   notifications: [notificationSchema],
+  isRemoved: { type: Boolean, default: false },
 });
 
 module.exports = mongoose.model("User", userSchema);

@@ -278,7 +278,7 @@ router.post("/posts", isAuthenticated, async (req, res) => {
         type: "error",
       });
     }
-
+    // console.log(fields)
     // console.log(files.image.name);
     if (files.image !== undefined) {
       const fileName = Date.now() + "-" + files.image.name;
