@@ -17,7 +17,7 @@ app.use(sirv("static", { dev }));
 
 // Mongoose
 mongoose.connect(
-  "mongodb+srv://cloneBook:clonebook@clonebook-n5po7.mongodb.net/CloneBook",
+  "",
   { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false }
 );
 
